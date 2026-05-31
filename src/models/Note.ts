@@ -1,14 +1,28 @@
 import mangoose, { Document, Schema } from "mongoose";
+import { INote } from "../interfaces/index";
 
-// 1 Define an interface for the Note document
-export interface INote extends Document {
-  title: string;
-  content: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+// Extend mongoose Document with our INote interface
+export interface INoteDocument extends Omit<INote, "_id">, Document {}
 
-// 2  Mongoose schema - describe how data is stored in mongoDB
+// Category sub-schema — stored inside each note
+const categorySchema: Schema = new Schema({
+  name: {
+    type: String,
+    required: [true, "Category name is required"],
+    trim: true,
+    enum: {
+      values: ["work", "personal", "study", "health", "finance", "other"],
+      message:
+        "Category must be: work, personal, study, health, finance, or other",
+    },
+  },
+  color: {
+    type: String,
+    trim: true,
+    default: "gray",
+  },
+});
+
 const NoteSchema: Schema = new Schema(
   {
     title: {
@@ -22,10 +36,17 @@ const NoteSchema: Schema = new Schema(
       required: [true, "Content is required"],
       trim: true,
     },
+    category: {
+      type: categorySchema,
+      required: [true, "Category is required"],
+    },
   },
   {
     timestamps: true,
   },
 );
 
-export default mangoose.model<INote>("Note", NoteSchema);
+// Index on category name for faster queries
+NoteSchema.index({ "category.name": 1 });
+
+export default mangoose.model<INoteDocument>("Note", NoteSchema);

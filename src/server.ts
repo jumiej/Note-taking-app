@@ -3,11 +3,15 @@ import dotenv from "dotenv";
 import connectDB from "./config/db";
 import noteRoutes from "./routes/noteRoutes";
 import AppError from "./errors/AppError";
+import logger from "./middleware/logger";
 
 // load environment variables first
 dotenv.config();
 
 const app: Application = express();
+
+// Custom logger middleware
+app.use(logger);
 
 // Middleware to parse JSON bodies
 app.use(express.json());
