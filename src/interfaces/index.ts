@@ -74,7 +74,9 @@ export interface TypedRequest<T> extends Request {
 
 // Authenticated Request
 export interface AuthRequest extends Request {
-  user?: JwtPayload; // The logged-in user's data from the token
+  user?: JwtPayload;
+  params: any;
+  headers: any;
 }
 
 // API Response Interface
