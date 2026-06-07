@@ -6,17 +6,20 @@ import {
   createNote,
   updateNote,
   deleteNote,
-} from "../controller/noteController";
-
+} from "../controllers/noteController";
 import { validateCreateNote, validateUpdateNote } from "../middleware/validate";
+import protect from "../middleware/auth";
 
 const router = Router();
+
+// protect runs on ALL routes below, must have valid token
+router.use(protect);
 
 router.get("/", getAllNotes);
 router.get("/categories/:categoryId", getNotesByCategory);
 router.get("/:id", getNoteById);
-router.post("/", validateCreateNote, createNote); // Validate first, then create
-router.put("/:id", validateUpdateNote, updateNote); // Validate first, then update
+router.post("/", validateCreateNote, createNote);
+router.put("/:id", validateUpdateNote, updateNote);
 router.delete("/:id", deleteNote);
 
 export default router;

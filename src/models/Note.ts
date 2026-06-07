@@ -1,11 +1,18 @@
-import mangoose, { Document, Schema } from "mongoose";
-import { INote } from "../interfaces/index";
+import mongoose, { Document, Schema } from "mongoose";
 
-// Extend mongoose Document with our INote interface
-export interface INoteDocument extends Omit<INote, "_id">, Document {}
+export interface INoteDocument extends Document {
+  title: string;
+  content: string;
+  category: {
+    name: string;
+    color?: string;
+  };
+  user: mongoose.Types.ObjectId;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
-// Category sub-schema — stored inside each note
-const categorySchema: Schema = new Schema({
+const CategorySchema = new Schema({
   name: {
     type: String,
     required: [true, "Category name is required"],
@@ -16,20 +23,16 @@ const categorySchema: Schema = new Schema({
         "Category must be: work, personal, study, health, finance, or other",
     },
   },
-  color: {
-    type: String,
-    trim: true,
-    default: "gray",
-  },
+  color: { type: String, trim: true, default: "gray" },
 });
 
-const NoteSchema: Schema = new Schema(
+const NoteSchema = new Schema(
   {
     title: {
       type: String,
       required: [true, "Title is required"],
       trim: true,
-      maxLength: [100, "Title cannot exceed 100 characters"],
+      maxlength: [100, "Title cannot exceed 100 characters"],
     },
     content: {
       type: String,
@@ -37,16 +40,19 @@ const NoteSchema: Schema = new Schema(
       trim: true,
     },
     category: {
-      type: categorySchema,
+      type: CategorySchema,
       required: [true, "Category is required"],
     },
+    user: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "Note must belong to a user"],
+    },
   },
-  {
-    timestamps: true,
-  },
+  { timestamps: true },
 );
 
-// Index on category name for faster queries
 NoteSchema.index({ "category.name": 1 });
+NoteSchema.index({ user: 1 });
 
-export default mangoose.model<INoteDocument>("Note", NoteSchema);
+export default mongoose.model<INoteDocument>("Note", NoteSchema);
